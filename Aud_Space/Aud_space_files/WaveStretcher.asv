@@ -1,0 +1,14 @@
+stretcher=9;
+Liner=zeros(1,(length(Vect)-1)*stretcher);
+Liner(1)=Vect(1);
+for i=1:(length(Vect)-1)
+    slope=(Vect(i+1)-Vect(i))/stretcher;
+    for j=0:(stretcher-2)
+        Liner(stretcher*i-j)=Vect(i)+slope*(stretcher-1-j);
+    end
+    Liner (stretcher*i+1)=Vect(i+1);
+end
+
+    SmoothLine=smooth(Liner,stretcher*2/3);
+
+return

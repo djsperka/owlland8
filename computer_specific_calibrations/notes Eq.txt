@@ -1,0 +1,4 @@
+08/01/2008
+Sridhar created new calibration file for new earphone set (old one from Rig 2 and new one from Rig 3)
+Calibration file was saved in two formats: EQ_file_AUTOSAVE_NEWEAR.mat (automatically saved by calibration program), and EQ_file_Knu-Thunderclap_NEWEAR_nr.mat ('cal' structure saved by SD before he knew there was a way to automatically save it)
+Current EQ_file_Knu-Thunderclap_nr.mat is a copy of EQ_file_AUTOSAVE_NEWEAR.mat

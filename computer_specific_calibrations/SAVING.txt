@@ -1,0 +1,6 @@
+So for some reason, when I save and load calibaration files, it is actually just accessing EQ_file_.m
+
+However, when you load with Aud_space, it loads Eq_file_RigRunner.mat
+
+WHEN SAVING: make sure there is a copy of current files in BACKUPS.  Then delate the current file and save a new one.  
+Copy to backups and rename.  Use Check Filters to generate transfer function plots, and save those to BACKUPS also. 
