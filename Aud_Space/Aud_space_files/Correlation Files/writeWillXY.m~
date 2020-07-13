@@ -1,0 +1,8 @@
+function writeWillXY(x1, y1, fname)
+
+fid = fopen(fname, 'w');
+
+% make sure 
+fprintf(fid, '%f %f\n', [x1 y1], [2 inf]);
+fclose(fid);
+end
