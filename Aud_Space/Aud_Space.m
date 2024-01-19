@@ -3,27 +3,41 @@ function Aud_Space(user_defaults)
 global snd rec stopf runf pausef;
 global RP_1 RP_2 pa5_1 pa5_2 zbus RA_16 screen_offset;
 
-addpath(genpath('C:\MATLAB6p5p2\toolbox\Psychtoolbox')) %added in spring 2011 - DJT
-addpath(genpath('C:\MATLAB6p5p2\toolbox\signal\signal')) %added fall 2011
+% addpath(genpath('C:\MATLAB6p5p2\toolbox\Psychtoolbox')) %added in spring 2011 - DJT
+% addpath(genpath('C:\MATLAB6p5p2\toolbox\signal\signal')) %added fall 2011
 
-currentdir=pwd;
 stopf=0;
 runf=0;
 snd.pause_flag=0;
 
+% Create useful folder names, set path (this session only).
 
-ASPath=strcat(currentdir,'\Aud_space_files');
-RPVDSpath=strcat(currentdir,'\RPVDS');
-defaultpath=strcat(currentdir,'\Defaults\');
-EqPath=strcat(currentdir,'\..\computer_specific_calibrations');
+[pathAS, b, x] = fileparts(mfilename('fullpath'));
 
+
+%currentdir=pwd;
+pathOwl=fullfile(pathAS, '..');
+pathASF=fullfile(pathAS,'Aud_space_files');
+pathRPVDS=fullfile(pathAS,'RPVDS');
+pathDefault=fullfile(pathAS,'Defaults');
+pathEQ=fullfile(pathOwl, 'computer_specific_calibrations');
+
+addpath(pathASF, ...
+        fullfile(pathASF, 'Flexible_Stim'), ...
+        fullfile(pathOwl, 'Equalization'), ...
+        fullfile(pathOwl, 'DataAnalysis'));
+        
+
+    
+%% Load user defaults file. 
+    
 if nargin==0    %%load the appropriate defaults
     user_defaults='offline';
 end
-load([defaultpath,user_defaults]);
-snd.defaults=[defaultpath,user_defaults];
+load(fullfile(pathDefault, user_defaults));
+snd.defaults=fullfile(pathDefault, user_defaults);
 
-snd.path=defaultpath;      %%default path for saving upon start
+snd.path=pathDefault;      %%default path for saving upon start
 
 [junk_info,current_rig]=dos('hostname');
 
@@ -37,37 +51,38 @@ if snd.runmode==1
     snd.rigs
     char(snd.rigs(current_rig_p))
     current_rig_p
-    vis_cal_file=['vis_',char(snd.rigs(current_rig_p))];
-    EQ_cal_file=['EQ_file_',char(snd.rigs(current_rig_p))];
+    vis_cal_base=['vis_', char(snd.rigs(current_rig_p)), '.mat'];
+    EQ_cal_base=['EQ_file_',char(snd.rigs(current_rig_p)), '.mat'];
+    gamma_inv_base=['gamma_inv_',char(snd.rigs(current_rig_p)), '.mat'];
     
-    gamma_inv_file=['gamma_inv_',char(snd.rigs(current_rig_p))];
+    vis_cal_filename = fullfile(pathEQ, vis_cal_base);
+    EQ_cal_filename = fullfile(pathEQ, EQ_cal_base);
+    gamma_inv_filename = fullfile(pathEQ, gamma_inv_base);
     
     
-    
-    
-    if exist([EqPath,'\',vis_cal_file,'.mat'])~=2
-        fprintf(1,'ERROR: %s.mat  was not found \nMake sure the %s directory contains this file', vis_cal_file, EqPath);
+    if exist(vis_cal_filename)~=2
+        fprintf(1,'ERROR: vis cal file %s was not found \nMake sure the %s directory contains this file', vis_cal_base, pathEQ);
         return;
     end
-    if exist([EqPath,'\',EQ_cal_file,'.mat'])~=2
-        fprintf(1,'ERROR: %s.mat  was not found \nMake sure the %s directory contains this file', EQ_cal_file, EqPath);
+    if exist(EQ_cal_filename)~=2
+        fprintf(1,'ERROR: EQ cal file %s was not found \nMake sure the %s directory contains this file', EQ_cal_base, pathEQ);
         return;
     end
     
-    if exist([EqPath,'\',gamma_inv_file,'.mat'])~=2
-        fprintf(1,'ERROR: %s.mat  was not found \nMake sure the %s directory contains this file', gamma_inv_file, EqPath);
+    if exist(gamma_inv_filename)~=2
+        fprintf(1,'ERROR: Gamma cal file %s was not found \nMake sure the %s directory contains this file', gamma_inv_base, pathEQ);
         return;
     end
     
     %%load the visual calibrations
-    vis_cal=load([EqPath,'\',vis_cal_file]);
+    vis_cal=load(vis_cal_filename);
     vis_fields=fieldnames(vis_cal.snd);
     for curr_field=1:length(vis_fields)
         snd=setfield(snd,vis_fields{curr_field},getfield(vis_cal.snd,vis_fields{curr_field}));
     end
     
-    %        %% load the gamma curve
-    load([EqPath,'\',gamma_inv_file]);
+    %% load the gamma curve
+    load(gamma_inv_filename);
     snd.gamma_inv(2,:)=gamma_xaxis;
     snd.gamma_inv(1,:)=gamma_inv;
     
@@ -85,16 +100,16 @@ Screen('CloseAll');                 %%  Close the Screen
 myscreen=get(0,'Screensize');   %%size of Screen for opening windows
 screen_offset=(snd.controlwindow-1)*myscreen(3); %Made Global, so stimulus window opens on the correct Screen.  DJT 2/22/2012
 
-cd(ASPath);
+cd(pathASF);
 
 if snd.runmode==1    %%  if you are planning on collecting data
     
     %%Changed to RA16eight djt 9/13/2012
-    loadTDT(RPVDSpath,'rp1_AM','rp2_AM','RA16eight',snd.atten_num, snd.fs);
+    loadTDT(pathRPVDS,'rp1_AM','rp2_AM','RA16eight',snd.atten_num, snd.fs);
     %         loadTDT(RPVDSpath,'rp1_AM','rp2_test','RA16four',snd.atten_num);
     
     %%  set the equalization files
-    load([EqPath,'\',EQ_cal_file]);
+    load(EQ_cal_filename);
     eq_left=  cal.invIR_L';
     eq_right= cal.invIR_R';
     clear cal;
