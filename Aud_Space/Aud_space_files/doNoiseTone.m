@@ -25,9 +25,10 @@ function doNoiseTone()
     nt.nperblock = 500;
     nt.nblocks = 10;
     nt.isi = snd.isi;
-    nt.ibi = 30000; % ms
+    nt.ibi = 15000; % ms
     nt.rise = snd.rise;
-    
+    nt.amplitude = snd.aplitude;
+
     if findobj(0, 'tag', NTTag)>=1
         figure(findobj(0, 'tag', NTTag));     %% set the first window as active
     else    %%open a new window
