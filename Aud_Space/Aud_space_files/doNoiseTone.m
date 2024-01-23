@@ -440,11 +440,18 @@ function doNoiseTone()
     %UNTITLED4 Summary of this function goes here
     %   Detailed explanation goes here
     
+        global RP_1;
+        
         fprintf('Running Noise Tone\n');
 
         totalMSPerBlock = nt.nperblock * (nt.pre1 + nt.duration1 + nt.post1 + nt.isi + nt.pre2 + nt.duration2 + nt.post2 + nt.isi);
         totalMS = nt.nblocks * totalMSPerBlock + (nt.nblocks-1) * nt.ibi;
         fprintf('Expected running time %d sec per block, %d sec total\n', totalMSPerBlock/1000, totalMS/1000);
+        
+        fprintf('Creating sounds, loading on RP2...\n');
+        [nNoise, nTone, sound] = makeNoiseTone(snd.fs, snd.amplitude, nt.duration1, nt.freqlo1, nt.freqhi1, nt.duration2, nt.frequency);
+        RP_1.WriteTagV('sound_corr', 0, sound);
+
     
     end
 
