@@ -215,7 +215,7 @@ uimenu(fb,'Label','Run Continuous','Callback','set_continuous','Accelerator','C'
 uimenu(fb,'Label','');
 uimenu(fb,'Label','Interleave Traces', 'Callback', 'interleave_cb');
 uimenu(fb,'Label','');
-uimenu(fb,'Label','Noise-tone blocks', 'Callback', 'noisetone_cb');
+uimenu(fb,'Label','Noise-tone blocks', 'Callback', 'doNoiseTone');
 uimenu(fb,'Label','');
 uimenu(fb,'Label','Pause','Callback','pause_cb;',...
     'Separator','off','Accelerator','P','tag','Pause_menu');
