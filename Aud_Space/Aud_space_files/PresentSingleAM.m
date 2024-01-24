@@ -1,6 +1,7 @@
-function PresentSingleAM(itd1, ild1, abi1, duration, rise, pre, corr_condition, on_off1, Wave_pointer)
-%PresentSingleAM Halt hardware, set tag values for sound presentation, then
-%run hardware (which waits for a trigger before playing sound).
+function runTDTSound(itd1, ild1, abi1, duration, rise, pre, Wave_pointer)
+%runTDTSound Halt hardware, set tag values for sound presentation, then
+%run hardware (which waits for a trigger before playing sound). Based on
+%PresentAM().
 
     global RP_1 pa5_1 pa5_2;
     
@@ -29,7 +30,6 @@ function PresentSingleAM(itd1, ild1, abi1, duration, rise, pre, corr_condition, 
 
     %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
-    RP_1.SetTagVal('Corr', corr_condition);
     
     %%%%%%%%%%%%%%%%%%%%%%%
     
@@ -45,14 +45,15 @@ function PresentSingleAM(itd1, ild1, abi1, duration, rise, pre, corr_condition, 
         right_delay1=.05;   % 
     end
     
-    %%%%%%%%%%%%%%%%% turn sounds on and off
+%     onoff = on_off1;
+%     if onoff ~= 1; onoff = 0; end
+%     RP_1.SetTagVal('onoff1', onoff);
+% DJS this value always set to 1 - see below
 
-    onoff = on_off1;
-    if onoff ~= 1; onoff = 0; end
-    RP_1.SetTagVal('onoff1', onoff);
+% DJS - same is true for 'corr' - always using corr_condition=0
 
-    %%%%%%%%%%%%   set sound values
-
+    RP_1.SetTagVal('onoff1', 1);
+    RP_1.SetTagVal('Corr', 0);
     RP_1.SetTagVal('leftdelay1', left_delay1);
     RP_1.SetTagVal('rightdelay1', right_delay1);
     RP_1.SetTagVal('duration', duration);
