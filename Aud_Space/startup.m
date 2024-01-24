@@ -5,9 +5,6 @@ currentdir=cd;
 ASPath=strcat(currentdir,'\Aud_space_files');
 addpath (ASPath);
 addpath (strcat(currentdir,'\Aud_space_files\Flexible_Stim'))
-addpath (strcat(currentdir,'\..\DataAnalysis'))
-
+%addpath (strcat(currentdir,'\..\DataAnalysis'))
 addpath (strcat(currentdir,'\..\Equalization'))
- 
-% addpath('')
 
