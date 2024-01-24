@@ -1,7 +1,8 @@
 function runTDTSound(itd1, ild1, abi1, duration, rise, pre, Wave_pointer)
 %runTDTSound Halt hardware, set tag values for sound presentation, then
 %run hardware (which waits for a trigger before playing sound). Based on
-%PresentAM().
+%PresentAM(). Note, I think the hardware will still require a trigger to
+%actually process the sounds. 
 
     global RP_1 pa5_1 pa5_2;
     
@@ -28,13 +29,7 @@ function runTDTSound(itd1, ild1, abi1, duration, rise, pre, Wave_pointer)
         pa5_2.Display(err);
     end
 
-    %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
-
-    
-    %%%%%%%%%%%%%%%%%%%%%%%
-    
-    
-    %get delay values for ITD
+    %get delay values
 
     delay=abs(itd1/1000);       %   adjust the ITD from microseconds to ms
     if itd1<=0  %% right ear lagging
