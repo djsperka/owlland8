@@ -451,7 +451,20 @@ function doNoiseTone()
         fprintf('Creating sounds, loading on RP2...\n');
         [nNoise, nTone, sound] = makeNoiseTone(snd.fs, snd.amplitude, nt.duration1, nt.freqlo1, nt.freqhi1, nt.duration2, nt.frequency);
         RP_1.WriteTagV('sound_corr', 0, sound);
+        [nNoise_uncorr, nTone_uncorr, sound_uncorr] = makeNoiseTone(snd.fs, snd.amplitude, nt.duration1, nt.freqlo1, nt.freqhi1, nt.duration2, nt.frequency);
+        RP_1.WriteTagV('sound_uncorr', 0, sound_uncorr);   
+        % The use of one or both of these is controlled by the 
+        % corr_condition, abbreviated as 'corr' in the TDT tags. There are 
+        % two conditions: 0 is correlated L/R, 1 is uncorrelated. 
 
+        % block loop
+        for iblock=1:nt.nblocks
+
+            % noise-tone pairs within each block, with ISI
+            for ipair=1:nt.nperblock
+
+                % Noise
+                
     
     end
 
