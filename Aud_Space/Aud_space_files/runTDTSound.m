@@ -56,9 +56,8 @@ function runTDTSound(itd1, ild1, abi1, duration, rise, pre, Wave_pointer)
     RP_1.SetTagVal('pre', pre);
     RP_1.SetTagVal('Wave_pointer', Wave_pointer);
 
-
     %% activate the hardware
-    RP_1.run();
+    invoke(RP_1,'run');   
     
     return;
     

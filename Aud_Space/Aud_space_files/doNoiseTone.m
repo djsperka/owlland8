@@ -27,7 +27,7 @@ function doNoiseTone()
     nt.isi = snd.isi;
     nt.ibi = 15000; % ms
     nt.rise = snd.rise;
-    nt.amplitude = snd.aplitude;
+    nt.amplitude = snd.amplitude;
 
     if findobj(0, 'tag', NTTag)>=1
         figure(findobj(0, 'tag', NTTag));     %% set the first window as active
@@ -436,6 +436,22 @@ function doNoiseTone()
         close;
     end
     
+    function triggerAndWait(w, rect, ms)
+        % draw trig in rect
+        Screen('FillRect', w, [127, 127, 127]);
+        Screen('FillRect', w, [0,0,0], rect);
+        Screen('FillOval', w, [255,0,0], rect);
+        Screen('Flip', w);
+        
+        % erase trig from rect
+        Screen('FillRect', w, [127, 127, 127]);
+        Screen('FillRect', w, [0,0,0], rect);
+        Screen('Flip', w);
+        
+        % now wait
+        WaitSecs(ms/1000.0);
+    end
+
     function runNoiseTone(src, event)
     %UNTITLED4 Summary of this function goes here
     %   Detailed explanation goes here
@@ -443,7 +459,12 @@ function doNoiseTone()
         global RP_1;
         
         fprintf('Running Noise Tone\n');
+        
+        % disable run button
+        set(nt.uiRunButton, 'enable','off');
 
+        
+        
         totalMSPerBlock = nt.nperblock * (nt.pre1 + nt.duration1 + nt.post1 + nt.isi + nt.pre2 + nt.duration2 + nt.post2 + nt.isi);
         totalMS = nt.nblocks * totalMSPerBlock + (nt.nblocks-1) * nt.ibi;
         fprintf('Expected running time %d sec per block, %d sec total\n', totalMSPerBlock/1000, totalMS/1000);
@@ -457,15 +478,48 @@ function doNoiseTone()
         % corr_condition, abbreviated as 'corr' in the TDT tags. There are 
         % two conditions: 0 is correlated L/R, 1 is uncorrelated. 
 
+        
+        % Open window. We only need this for triggering. 
+        [snd.window, wrect] = Screen(0, 'OpenWindow', 0);
+        
         % block loop
         for iblock=1:nt.nblocks
 
+            fprintf('Block %d\n', iblock);
+            
             % noise-tone pairs within each block, with ISI
             for ipair=1:nt.nperblock
 
+                fprintf('Noise %d/%d\n', iblock, ipair);
+
                 % Noise
+                runTDTSound(nt.itd1, nt.ild1, nt.abi1, nt.duration1, nt.rise, nt.pre1, 0);
                 
-    
+                % Trigger and wait until sound complete
+                triggerAndWait(snd.window, snd.trigger_loc, nt.pre1+nt.duration1);
+                
+                % ISI                
+                WaitSecs(nt.isi/1000);
+
+                fprintf('Tone %d/%d\n', iblock, ipair);
+
+                % Tone
+                runTDTSound(nt.itd2, nt.ild2, nt.abi2, nt.duration2, nt.rise, nt.pre2, nNoise);
+                
+                % Trigger and wait until sound complete
+                triggerAndWait(snd.window, snd.trigger_loc, nt.pre2+nt.duration2);
+                
+                % ISI
+                WaitSecs(nt.isi/1000);
+
+            end
+        end
+        Screen('Close', snd.window);
+        snd.window = 0;
+        
+        % enable run button
+        set(nt.uiRunButton, 'enable','on');
+
     end
 
 
