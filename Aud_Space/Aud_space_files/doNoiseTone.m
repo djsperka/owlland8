@@ -369,8 +369,8 @@ function doNoiseTone()
             'fontweight', 'bold', ...
             'fontsize', 10,...
             'backgroundcolor', c_red,...
-            'callback', @runAAA);
-%            'callback', @runNoiseTone);
+            'callback', @runNoiseTone);
+%            'callback', @runAAA);
 
     
         %% pause button
@@ -381,8 +381,8 @@ function doNoiseTone()
             'fontweight', 'bold', ...
             'fontsize', 10,...
             'backgroundcolor', c_red,...
-            'callback', @pauseAAA);
-%            'callback', @pauseNoiseTone);
+            'callback', @pauseNoiseTone);
+%            'callback', @pauseAAA);
     
         %% stop button
         nt.uiStopButton = uicontrol('style','pushbutton',...
@@ -392,8 +392,8 @@ function doNoiseTone()
             'fontweight', 'bold', ...
             'fontsize', 10,...
             'backgroundcolor', c_red,...
-            'callback', @stopAAA);
-%            'callback', @stopNoiseTone);
+            'callback', @stopNoiseTone);
+%            'callback', @stopAAA);
 
         %% status area
         uicontrol('style', 'text', ...
@@ -404,7 +404,7 @@ function doNoiseTone()
             'fontsize', 10, 'fontweight', 'bold');
         nt.uiStatusArea = uicontrol('style', 'text', ...
             'position', [xc3 50 220 60], ...
-            'String', {'waiting....', 'still waiting', 'waiting even more'}, ...
+            'String', {'waiting....'}, ...
             'horizontalalignment', 'left', ...
             'fontsize', 10, 'fontweight', 'bold');
         updateButtons();
@@ -429,18 +429,19 @@ function doNoiseTone()
         end
     end
 
-    function updateStatus(st, ct)
-        nt.uiStatusArea.String = [st ' count ' num2str(ct)];
+    function updateStatus(st)
+        nt.uiStatusArea.String = st;
     end
 
     function stopNoiseTone(src, event)
         stopFlag = true;
         pauseFlag = false;
+        updateButtons();
     end
 
     function pauseNoiseTone(src, event)
-        % toggle pauseFlag
         pauseFlag = ~pauseFlag;
+        if pauseFlag; nt.uiPauseButton.String = 'Resume'; else; nt.uiPauseButton.String = 'Pause'; end;
     end
 
     function cbNoiseTone(src, event)
@@ -499,6 +500,8 @@ function doNoiseTone()
     
         % update buttons
         runningFlag = 1;
+        stopFlag = 0;
+        pauseFlag = 0;
         updateButtons();
         
         
@@ -517,42 +520,55 @@ function doNoiseTone()
 
         
         % Open window. We only need this for triggering. 
-        [snd.window, wrect] = Screen(0, 'OpenWindow', 0);
+        [window, wrect] = Screen(0, 'OpenWindow', 0);
+        trigger_loc = snd.trigger_loc;
         
         % block loop
         for iblock=1:nt.nblocks
 
-            fprintf('Block %d\n', iblock);
+            %fprintf('Block %d\n', iblock);
             
             % noise-tone pairs within each block, with ISI
             for ipair=1:nt.nperblock
 
-                fprintf('Noise %d/%d\n', iblock, ipair);
+                if ~pauseFlag
 
-                % Noise
-                runTDTSound(nt.itd1, nt.ild1, nt.abi1, nt.duration1, nt.rise, nt.pre1, 0);
-                
-                % Trigger and wait until sound complete
-                triggerAndWait(snd.window, snd.trigger_loc, nt.pre1+nt.duration1);
-                
-                % ISI                
-                WaitSecs(nt.isi/1000);
+                    updateStatus({'Running', sprintf('Block %d/%d', iblock, nt.nblocks), sprintf('Rep %d/%d', ipair, nt.nperblock)});
+                    %fprintf('Noise %d/%d\n', iblock, ipair);
 
-                fprintf('Tone %d/%d\n', iblock, ipair);
+                    % Noise
+                    runTDTSound(nt.itd1, nt.ild1, nt.abi1, nt.duration1, nt.rise, nt.pre1, 0);
 
-                % Tone
-                runTDTSound(nt.itd2, nt.ild2, nt.abi2, nt.duration2, nt.rise, nt.pre2, nNoise);
-                
-                % Trigger and wait until sound complete
-                triggerAndWait(snd.window, snd.trigger_loc, nt.pre2+nt.duration2);
-                
-                % ISI
-                WaitSecs(nt.isi/1000);
+                    % Trigger and wait until sound complete
+                    triggerAndWait(window, trigger_loc, nt.pre1+nt.duration1);
 
+                    % ISI                
+                    WaitSecs(nt.isi/1000);
+
+                    %fprintf('Tone %d/%d\n', iblock, ipair);
+
+                    % Tone
+                    runTDTSound(nt.itd2, nt.ild2, nt.abi2, nt.duration2, nt.rise, nt.pre2, nNoise);
+
+                    % Trigger and wait until sound complete
+                    triggerAndWait(window, trigger_loc, nt.pre2+nt.duration2);
+
+                    % ISI
+                    WaitSecs(nt.isi/1000);
+                    
+                else
+                    updateStatus({'Paused', sprintf('Block %d/%d', iblock, nt.nblocks), sprintf('Rep %d/%d', ipair, nt.nperblock)});                    
+                    while pauseFlag && ~stopFlag
+                        WaitSecs(0.5);
+                        drawnow;
+                    end
+                end
+                drawnow;
+                if stopFlag; break; end;
             end
+            if stopFlag; break; end;
         end
-        Screen('Close', snd.window);
-        snd.window = 0;
+        Screen('Close', window);
         
         % enable run button
         set(nt.uiRunButton, 'enable','on');
