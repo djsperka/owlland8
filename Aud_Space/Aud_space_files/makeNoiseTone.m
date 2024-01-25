@@ -5,10 +5,10 @@ function [nSampleNoise, nSampleTone, sound] = makeNoiseTone(fs, amplitude, dur1,
     % hardware. I have no idea if that's for real, but there are comments
     % in code that refer to "edge effects".
     dur1Seconds = 0.001 * (dur1 + 100);
-    nSampleNoise = dur1Seconds * fs
+    nSampleNoise = dur1Seconds * fs;
     dur2Seconds = 0.001 * (dur2 + 100);
     t=[0:(1/fs):dur2Seconds-(1/fs)];  % # points to use
-    nSampleTone = length(t)
+    nSampleTone = length(t);
     sound = zeros(nSampleNoise + nSampleTone, 1);
  
     %% Noise

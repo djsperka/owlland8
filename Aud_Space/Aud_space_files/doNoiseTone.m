@@ -1,6 +1,10 @@
 function doNoiseTone()
     global snd screen_offset;
     
+    runningFlag = 0;    % this is 1 when stim are running
+    pauseFlag = 0;
+    stopFlag = 0;
+
     c_yellow=[.95, .95, .7];
     c_green=[.5,.58,.5];
     c_red=[.7 .4 .4];
@@ -33,7 +37,7 @@ function doNoiseTone()
         figure(findobj(0, 'tag', NTTag));     %% set the first window as active
     else    %%open a new window
         myscreen=get(0,'screensize');
-        figure('position', [4+screen_offset,(myscreen(4)-380),600,350], 'menubar', 'none', 'tag', NTTag, 'color', c_yellow);
+        figure('position', [4+screen_offset,(myscreen(4)-380),600,350], 'menubar', 'none', 'tag', NTTag, 'color', c_yellow, 'CloseRequestFcn', @closeNoiseTone);
     
         % column 1 is for noise.
         xc1 = 20;
@@ -356,19 +360,8 @@ function doNoiseTone()
             'tag','nblocks',...
             'callback', @cbNoiseTone);
     
-    
-    
-        %% close button
-        nt.uiCloseButton = uicontrol('style','pushbutton',...
-            'position', [xc3+100 120 60 20],...
-            'horizontalalignment','center',...
-            'string','Close',...
-            'fontweight', 'bold', ...
-            'fontsize', 10,...
-            'backgroundcolor', c_red,...
-            'callback', @closeNoiseTone);
-    
-        %% run/stop button
+
+        %% run button
         nt.uiRunButton = uicontrol('style','pushbutton',...
             'position', [xc3 120 60 20],...
             'horizontalalignment','center',...
@@ -377,34 +370,71 @@ function doNoiseTone()
             'fontsize', 10,...
             'backgroundcolor', c_red,...
             'callback', @runNoiseTone);
+
     
+        %% pause button
+        nt.uiPauseButton = uicontrol('style','pushbutton',...
+            'position', [xc3+80 120 60 20],...
+            'horizontalalignment','center',...
+            'string','Pause',...
+            'fontweight', 'bold', ...
+            'fontsize', 10,...
+            'backgroundcolor', c_red,...
+            'callback', @pauseNoiseTone);
+    
+        %% stop button
+        nt.uiStopButton = uicontrol('style','pushbutton',...
+            'position', [xc3+160 120 60 20],...
+            'horizontalalignment','center',...
+            'string','Stop',...
+            'fontweight', 'bold', ...
+            'fontsize', 10,...
+            'backgroundcolor', c_red,...
+            'callback', @stopNoiseTone);
+
+        %% status area
+        uicontrol('style', 'text', ...
+            'position', [xc3 80 60 20], ...
+            'String', 'Status:', ...
+            'horizontalalignment', 'right', ...
+            'backgroundcolor',c_yellow,...
+            'fontsize', 10, 'fontweight', 'bold');
+        nt.uiStatusArea = uicontrol('style', 'text', ...
+            'position', [xc3 50 220 60], ...
+            'String', {'waiting....', 'still waiting', 'waiting even more'}, ...
+            'horizontalalignment', 'left', ...
+            'fontsize', 10, 'fontweight', 'bold');
+        updateButtons();
     
     end    
-%     
-%     %% default button
-%     uicontrol('style','pushbutton',...
-%         'units','normalized',...
-%         'position', [.85 0.02 .13 .08],...
-%         'backgroundcolor', c_red,...
-%         'horizontalalignment','center',...
-%         'string','Defaults',...
-%         'fontsize', 10,...
-%         'fontweight', 'bold', ...
-%         'callback','getNoiseToneDefaults');
-%     
-%     
-%     
-%     %%%%% set AM choice
-%     
-%     shift1=.4;
-%     shift2=.45;
-%     
-%     
-% end;
+    
+    function updateButtons()
+        if ~runningFlag
+            % enable run
+            set(nt.uiRunButton, 'enable','on');
 
+            % disable pause and stop
+            set(nt.uiPauseButton, 'enable','off');
+            set(nt.uiStopButton, 'enable','off');
+        else
+            % disable run
+            set(nt.uiRunButton, 'enable','off');
 
+            % Enable pause and stop
+            set(nt.uiPauseButton, 'enable','on');
+            set(nt.uiStopButton, 'enable','on');
+        end
+    end
 
+    function stopNoiseTone(src, event)
+        stopFlag = 1;
+        pauseFlag = 0;
+    end
 
+    function pauseNoiseTone(src, event)
+        pauseFlag = 1;
+        stopFlag = 0;
+    end
 
     function cbNoiseTone(src, event)
     
@@ -433,7 +463,7 @@ function doNoiseTone()
     
     function closeNoiseTone(src, event)
         fprintf('In closeNoiseTone()\n');
-        close;
+        delete(gcf);    % don't call close() from here!
     end
     
     function triggerAndWait(w, rect, ms)
@@ -459,10 +489,10 @@ function doNoiseTone()
         global RP_1;
         
         fprintf('Running Noise Tone\n');
-        
-        % disable run button
-        set(nt.uiRunButton, 'enable','off');
-
+    
+        % update buttons
+        runningFlag = 1;
+        updateButtons();
         
         
         totalMSPerBlock = nt.nperblock * (nt.pre1 + nt.duration1 + nt.post1 + nt.isi + nt.pre2 + nt.duration2 + nt.post2 + nt.isi);

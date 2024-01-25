@@ -3,9 +3,6 @@ function Aud_Space(user_defaults)
 global snd rec stopf runf pausef;
 global RP_1 RP_2 pa5_1 pa5_2 zbus RA_16 screen_offset;
 
-% addpath(genpath('C:\MATLAB6p5p2\toolbox\Psychtoolbox')) %added in spring 2011 - DJT
-% addpath(genpath('C:\MATLAB6p5p2\toolbox\signal\signal')) %added fall 2011
-
 stopf=0;
 runf=0;
 snd.pause_flag=0;
@@ -13,9 +10,6 @@ snd.pause_flag=0;
 % Create useful folder names, set path (this session only).
 
 [pathAS, b, x] = fileparts(mfilename('fullpath'));
-
-
-%currentdir=pwd;
 pathOwl=fullfile(pathAS, '..');
 pathASF=fullfile(pathAS,'Aud_space_files');
 pathRPVDS=fullfile(pathAS,'RPVDS');
