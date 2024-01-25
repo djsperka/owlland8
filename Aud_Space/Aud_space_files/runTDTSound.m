@@ -20,13 +20,13 @@ function runTDTSound(itd1, ild1, abi1, duration, rise, pre, Wave_pointer)
     pa5_1.SetAtten(attenL1);
     err = pa5_1.GetError();
     if ~isempty(err)
-        pa5_1.Display(err);
+        fprintf('pa5_1 error: %s\n', err);
     end
 
     pa5_2.SetAtten(attenR1);
     err = pa5_2.GetError();
     if ~isempty(err)
-        pa5_2.Display(err);
+        fprintf('pa5_2 error: %s\n', err);
     end
 
     %get delay values
