@@ -1,9 +1,9 @@
 function doNoiseTone()
     global snd screen_offset;
     
-    runningFlag = 0;    % this is 1 when stim are running
-    pauseFlag = 0;
-    stopFlag = 0;
+    runningFlag = false;    % this is 1 when stim are running
+    pauseFlag = false;
+    stopFlag = false;
 
     c_yellow=[.95, .95, .7];
     c_green=[.5,.58,.5];
@@ -369,7 +369,8 @@ function doNoiseTone()
             'fontweight', 'bold', ...
             'fontsize', 10,...
             'backgroundcolor', c_red,...
-            'callback', @runNoiseTone);
+            'callback', @runAAA);
+%            'callback', @runNoiseTone);
 
     
         %% pause button
@@ -380,7 +381,8 @@ function doNoiseTone()
             'fontweight', 'bold', ...
             'fontsize', 10,...
             'backgroundcolor', c_red,...
-            'callback', @pauseNoiseTone);
+            'callback', @pauseAAA);
+%            'callback', @pauseNoiseTone);
     
         %% stop button
         nt.uiStopButton = uicontrol('style','pushbutton',...
@@ -390,7 +392,8 @@ function doNoiseTone()
             'fontweight', 'bold', ...
             'fontsize', 10,...
             'backgroundcolor', c_red,...
-            'callback', @stopNoiseTone);
+            'callback', @stopAAA);
+%            'callback', @stopNoiseTone);
 
         %% status area
         uicontrol('style', 'text', ...
@@ -420,20 +423,24 @@ function doNoiseTone()
             % disable run
             set(nt.uiRunButton, 'enable','off');
 
-            % Enable pause and stop
+            % Enable stop and pause
             set(nt.uiPauseButton, 'enable','on');
             set(nt.uiStopButton, 'enable','on');
         end
     end
 
+    function updateStatus(st, ct)
+        nt.uiStatusArea.String = [st ' count ' num2str(ct)];
+    end
+
     function stopNoiseTone(src, event)
-        stopFlag = 1;
-        pauseFlag = 0;
+        stopFlag = true;
+        pauseFlag = false;
     end
 
     function pauseNoiseTone(src, event)
-        pauseFlag = 1;
-        stopFlag = 0;
+        % toggle pauseFlag
+        pauseFlag = ~pauseFlag;
     end
 
     function cbNoiseTone(src, event)
@@ -551,6 +558,51 @@ function doNoiseTone()
         set(nt.uiRunButton, 'enable','on');
 
     end
+
+
+    function runAAA(src, event)
+    %UNTITLED4 Summary of this function goes here
+    %   Detailed explanation goes here
+    
+        fprintf('Running Noise Tone\n');
+    
+        % update buttons
+        runningFlag = 1;
+        stopFlag = 0;
+        pauseFlag = 0;
+        updateButtons();
+
+        count = 20;
+        while count > 0 && ~stopFlag
+
+            if pauseFlag
+                WaitSecs(0.5);
+                updateStatus('paused', count);
+            else
+                WaitSecs(1);
+                count = count - 1;
+                updateStatus('running', count);
+            end
+            drawnow;
+        end
+        runningFlag = 0;
+        updateButtons();
+        updateStatus('stopped', count);
+
+    end
+
+    function stopAAA(src, event)
+        stopFlag = true;
+        pauseFlag = false;
+        updateButtons();
+    end
+
+    function pauseAAA(src, event)
+        pauseFlag = ~pauseFlag;
+        if pauseFlag; nt.uiPauseButton.String = 'Resume'; else; nt.uiPauseButton.String = 'Pause'; end;
+    end
+
+
 
 
 end
