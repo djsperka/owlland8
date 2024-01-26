@@ -29,9 +29,9 @@ The files must exist in the folder *computer_specific_calibrations*.
 
 | File                   |     what is it?     |
 |------------------------|---------------------|
-| vis_*<rig>*.mat        | visual calibrations |
-| EQ_file_*<rig>*.mat    | L/R equalization    |
-| gamma_inv_*<rig>*.mat  | inverse gamma table |
+| vis_*rig*.mat        | visual calibrations |
+| EQ_file_*rig*.mat    | L/R equalization    |
+| gamma_inv_*rig*.mat  | inverse gamma table |
 
 
 ### Notes
