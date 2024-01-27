@@ -27,6 +27,9 @@ addParameter(p, 'rig', defaultRig, @(x) ischar(x));
 defaultScreenOffset = -1600;
 addParameter(p, 'offset', defaultScreenOffset, @(x) isscalar(x));
 
+% rcx file (testing)
+defaultRCX = 'rp1_AM';
+addParameter(p, 'rcx', defaultRCX, @(x) ischar(x));
 
 %% parse input
 
@@ -129,7 +132,8 @@ cd(pathASF);
 if snd.runmode==1    %%  if you are planning on collecting data
     
     %%Changed to RA16eight djt 9/13/2012
-    loadTDT(pathRPVDS,'rp1_AM','rp2_AM','RA16eight',snd.atten_num, snd.fs);
+    loadTDT(pathRPVDS, p.Results.rcx,'rp2_AM','RA16eight',snd.atten_num, snd.fs);
+    % djs use cmd line arg loadTDT(pathRPVDS,'rp1_AM','rp2_AM','RA16eight',snd.atten_num, snd.fs);
     %         loadTDT(RPVDSpath,'rp1_AM','rp2_test','RA16four',snd.atten_num);
     
     %%  set the equalization files
