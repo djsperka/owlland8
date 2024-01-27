@@ -132,6 +132,18 @@ end
         end
     end
     
+    
+    
+    cycleUsage = RP_1.GetCycUse;
+    fprintf('Cycle usage %f\n', cycleUsage);
+    nParTags = RP_1.GetNumOf('ParTag');
+    fprintf('There are %d par tags\n', nParTags);
+    for z=1:nParTags
+        pname = RP_1.GetNameOf('ParTag', z);
+        ptype = char(RP_1.GetTagType(pname));
+        psize = RP_1.GetTagSize(pname);
+        disp(['   ' pname ' type ' ptype '  size ' num2str(psize)]);
+    end
 %     if ~strcmp(RP2name,'')
 %         if invoke(RP_2,'loadCOFsf',strcat(RPVDS_path,'\',RP2name), 0) 
 %             invoke(RP_2, 'clearCOF'); Removed all instances of RP_2 DJT 7/30/2012 
