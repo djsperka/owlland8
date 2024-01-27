@@ -475,6 +475,8 @@ function doNoiseTone()
     end
     
     function triggerAndWait(w, rect, ms)
+        %global RP_1
+        %RP_1.SoftTrg(1)
         % draw trig in rect
         Screen('FillRect', w, [127, 127, 127]);
         Screen('FillRect', w, [0,0,0], rect);
@@ -486,6 +488,7 @@ function doNoiseTone()
         Screen('FillRect', w, [0,0,0], rect);
         Screen('Flip', w);
         
+
         % now wait
         WaitSecs(ms/1000.0);
     end
