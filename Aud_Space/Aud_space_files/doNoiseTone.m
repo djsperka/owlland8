@@ -1,5 +1,5 @@
 function doNoiseTone()
-    global snd screen_offset;
+    global snd screen_offset zbus RP_1;
     
     runningFlag = false;    % this is 1 when stim are running
     pauseFlag = false;
@@ -32,6 +32,8 @@ function doNoiseTone()
     nt.ibi = 15000; % ms
     nt.rise = snd.rise;
     nt.amplitude = snd.amplitude;
+    
+    nt.softtrig = true;
 
     if findobj(0, 'tag', NTTag)>=1
         figure(findobj(0, 'tag', NTTag));     %% set the first window as active
@@ -369,7 +371,7 @@ function doNoiseTone()
             'fontweight', 'bold', ...
             'fontsize', 10,...
             'backgroundcolor', c_red,...
-            'callback', @runNoiseTone);
+            'callback', {@runNoiseTone, nt.softtrig});
 %            'callback', @runAAA);
 
     
@@ -474,32 +476,46 @@ function doNoiseTone()
         delete(gcf);    % don't call close() from here!
     end
     
-    function triggerAndWait(w, rect, ms)
-        %global RP_1
-        %RP_1.SoftTrg(1)
-        % draw trig in rect
-        Screen('FillRect', w, [127, 127, 127]);
-        Screen('FillRect', w, [0,0,0], rect);
-        Screen('FillOval', w, [255,0,0], rect);
-        Screen('Flip', w);
-        
-        % erase trig from rect
-        Screen('FillRect', w, [127, 127, 127]);
-        Screen('FillRect', w, [0,0,0], rect);
-        Screen('Flip', w);
-        
+    function triggerAndWait(varargin)
 
+        % trigger all devices on zbus at once (not the same as trigger
+        % that starts sound playing).
+        invoke(zbus,'zBusTrigA',0,0,4);
+
+        ms = 0;
+        if nargin == 1
+        
+            RP_1.SoftTrg(1);
+            ms = varargin{1};
+            
+        elseif nargin == 3
+            
+            w = varargin{1};
+            rect = varargin{2};
+            ms = varargin{3};
+
+            % draw trig in rect
+            Screen('FillRect', w, [127, 127, 127]);
+            Screen('FillRect', w, [0,0,0], rect);
+            Screen('FillOval', w, [255,0,0], rect);
+            Screen('Flip', w);
+
+            % erase trig from rect
+            Screen('FillRect', w, [127, 127, 127]);
+            Screen('FillRect', w, [0,0,0], rect);
+            Screen('Flip', w);
+        
+        end
+        
         % now wait
         WaitSecs(ms/1000.0);
     end
 
-    function runNoiseTone(src, event)
+    function runNoiseTone(src, event, bSoftTrig)
     %UNTITLED4 Summary of this function goes here
     %   Detailed explanation goes here
     
-        global RP_1;
-        
-        fprintf('Running Noise Tone\n');
+        fprintf('Running Noise Tone, softtrig = %d\n', bSoftTrig);
     
         % update buttons
         runningFlag = 1;
@@ -521,10 +537,24 @@ function doNoiseTone()
         % corr_condition, abbreviated as 'corr' in the TDT tags. There are 
         % two conditions: 0 is correlated L/R, 1 is uncorrelated. 
 
+
+        triggerFcn1 = [];
+        triggerFcn2 = [];
+        if ~bSoftTrig
         
-        % Open window. We only need this for triggering. 
-        [window, wrect] = Screen(0, 'OpenWindow', 0);
-        trigger_loc = snd.trigger_loc;
+            % Open window. We only need this for triggering. 
+            [window, wrect] = Screen(0, 'OpenWindow', 0);
+            trigger_loc = snd.trigger_loc;
+            triggerFcn1 = @() triggerAndWait(window, trigger_loc, nt.pre1+nt.duration1);
+            triggerFcn2 = @() triggerAndWait(window, trigger_loc, nt.pre2+nt.duration2);
+            
+        else
+        
+            triggerFcn1 = @() triggerAndWait(nt.pre1+nt.duration1);
+            triggerFcn2 = @() triggerAndWait(nt.pre2+nt.duration2);
+
+        end        
+        
         
         % block loop
         for iblock=1:nt.nblocks
@@ -543,7 +573,7 @@ function doNoiseTone()
                     runTDTSound(nt.itd1, nt.ild1, nt.abi1, nt.duration1, nt.rise, nt.pre1, 0);
 
                     % Trigger and wait until sound complete
-                    triggerAndWait(window, trigger_loc, nt.pre1+nt.duration1);
+                    triggerFcn1();
 
                     % ISI                
                     WaitSecs(nt.isi/1000);
@@ -554,7 +584,7 @@ function doNoiseTone()
                     runTDTSound(nt.itd2, nt.ild2, nt.abi2, nt.duration2, nt.rise, nt.pre2, nNoise);
 
                     % Trigger and wait until sound complete
-                    triggerAndWait(window, trigger_loc, nt.pre2+nt.duration2);
+                    triggerFcn2();
 
                     % ISI
                     WaitSecs(nt.isi/1000);
@@ -571,7 +601,12 @@ function doNoiseTone()
             end
             if stopFlag; break; end;
         end
-        Screen('Close', window);
+        
+        if ~bSoftTrig
+
+           Screen('Close', window);
+           
+        end
         
         % enable run button
         set(nt.uiRunButton, 'enable','on');
