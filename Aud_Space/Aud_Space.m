@@ -105,13 +105,17 @@ if snd.runmode==1
     
 end
 
+
+
 %% get the white and black values for the computer
-window=Screen(0,'OpenWindow',0);
-snd.hz=Screen(window,'FrameRate');  %get the refresh rate of the monitor
-snd.black=BlackIndex(window);       %%  Find the value of black
-snd.white=WhiteIndex(window);       %%  Find the Value of white
-snd.priorityLevel=MaxPriority(0,'WaitBlanking');     %read the string 'loop' with high CPU priority.
-Screen('CloseAll');                 %%  Close the Screen
+if ~strcmp(p.Results.expt, 'noisetone')
+    window=Screen(0,'OpenWindow',0);
+    snd.hz=Screen(window,'FrameRate');  %get the refresh rate of the monitor
+    snd.black=BlackIndex(window);       %%  Find the value of black
+    snd.white=WhiteIndex(window);       %%  Find the Value of white
+    snd.priorityLevel=MaxPriority(0,'WaitBlanking');     %read the string 'loop' with high CPU priority.
+    Screen('CloseAll');                 %%  Close the Screen
+end
 %%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 
 % screen offset is the x position, in matlab figures, of the control
