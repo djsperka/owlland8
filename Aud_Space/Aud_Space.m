@@ -34,6 +34,7 @@ addParameter(p, 'rcx', defaultRCX, @(x) ischar(x));
 %% parse input
 
 parse(p, user_defaults, varargin{:});
+fprintf('\nAud_Space starting...\n\n');
 fprintf('User defaults %s\n', p.Results.userDefaults);
 fprintf('Expt chosen %s\n', p.Results.expt);
 fprintf('Rig chosen %s\n', p.Results.rig);
@@ -58,9 +59,11 @@ addpath(pathASF, ...
 
     
 %% Load user defaults file. 
-    
-load(fullfile(pathDefault, p.Results.userDefaults));
-snd.defaults=fullfile(pathDefault, p.Results.userDefaults);
+
+user_defaults_filename = fullfile(pathDefault, p.Results.userDefaults);
+fprintf('loading user defaults file: %s\n', user_defaults_filename);
+load(user_defaults_filename);
+snd.defaults = user_defaults_filename;
 
 snd.path=pathDefault;      %%default path for saving upon start
 
@@ -92,6 +95,7 @@ if snd.runmode==1
     end
     
     %%load the visual calibrations
+    fprintf('loading visual calibration file: %s\n', vis_cal_filename);
     vis_cal=load(vis_cal_filename);
     vis_fields=fieldnames(vis_cal.snd);
     for curr_field=1:length(vis_fields)
@@ -99,6 +103,7 @@ if snd.runmode==1
     end
     
     %% load the gamma curve
+    fprintf('loading gamma curve from file: %s\n', gamma_inv_filename);
     load(gamma_inv_filename);
     snd.gamma_inv(2,:)=gamma_xaxis;
     snd.gamma_inv(1,:)=gamma_inv;
