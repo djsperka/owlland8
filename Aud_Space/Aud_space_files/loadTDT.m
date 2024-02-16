@@ -87,16 +87,16 @@ end
     
     
     
-cycleUsage = RP_1.GetCycUse;
-fprintf('Cycle usage %f\n', cycleUsage);
-nParTags = RP_1.GetNumOf('ParTag');
-fprintf('There are %d par tags\n', nParTags);
-for z=1:nParTags
-    pname = RP_1.GetNameOf('ParTag', z);
-    ptype = char(RP_1.GetTagType(pname));
-    psize = RP_1.GetTagSize(pname);
-    disp(['   ' pname ' type ' ptype '  size ' num2str(psize)]);
-end
+% cycleUsage = RP_1.GetCycUse;
+% fprintf('Cycle usage %f\n', cycleUsage);
+% nParTags = RP_1.GetNumOf('ParTag');
+% fprintf('There are %d par tags\n', nParTags);
+% for z=1:nParTags
+%     pname = RP_1.GetNameOf('ParTag', z);
+%     ptype = char(RP_1.GetTagType(pname));
+%     psize = RP_1.GetTagSize(pname);
+%     disp(['   ' pname ' type ' ptype '  size ' num2str(psize)]);
+% end
 
 if ~RA_16.LoadCOFsf(strcat(RPVDS_path,'\',RA16name), 2)
     error('Cannot load DSP obj %s to rp2\n', strcat(RPVDS_path,'\',RA16name));
