@@ -15,18 +15,14 @@ function runTDTSound(itd1, ild1, abi1, duration, rise, pre, Wave_pointer)
     attenR1 = abi1 - ild1/2 ;
     
     %% halt the hardware
-    invoke(RP_1,'halt');   
-    
-    pa5_1.SetAtten(attenL1);
-    err = pa5_1.GetError();
-    if ~isempty(err)
-        fprintf('pa5_1 error: %s\n', err);
+    RP_1.Halt();
+
+    if ~pa5_1.SetAtten(attenL1)
+        error('Cannot set atten on pa5_1: %s', pa5_1.GetError());
     end
 
-    pa5_2.SetAtten(attenR1);
-    err = pa5_2.GetError();
-    if ~isempty(err)
-        fprintf('pa5_2 error: %s\n', err);
+    if ~pa5_2.SetAtten(attenR1)
+        error('Cannot set atten on pa5_2: %s', pa5_2.GetError());
     end
 
     %get delay values
@@ -40,13 +36,13 @@ function runTDTSound(itd1, ild1, abi1, duration, rise, pre, Wave_pointer)
         right_delay1=.05;   % 
     end
     
-%     onoff = on_off1;
-%     if onoff ~= 1; onoff = 0; end
-%     RP_1.SetTagVal('onoff1', onoff);
-% DJS this value always set to 1 - see below
-
-% DJS - same is true for 'corr' - always using corr_condition=0
-
+    % Both 'onoff1' and 'Corr' are always set to 1 for this usage. That
+    % means the noise is always correlated (same sound buffer used for left
+    % and right - that's because 'Corr' == 0). The 'onoff1' parameter is a
+    % holdover from when there were two sounds, and one of them could be
+    % switched on or off using this parameter. There are no longer two
+    % sounds here, but the 'onoff1' parameter remains. 
+    
     RP_1.SetTagVal('onoff1', 1);
     RP_1.SetTagVal('Corr', 0);
     RP_1.SetTagVal('leftdelay1', left_delay1);
@@ -55,9 +51,11 @@ function runTDTSound(itd1, ild1, abi1, duration, rise, pre, Wave_pointer)
     RP_1.SetTagVal('rise', rise+0.1);
     RP_1.SetTagVal('pre', pre);
     RP_1.SetTagVal('Wave_pointer', Wave_pointer);
-
-    %% activate the hardware
-    invoke(RP_1,'run');   
     
+    %% activate the hardware
+    if ~RP_1.Run()
+        error('Error running circuit.');
+    end
+
     return;
     
