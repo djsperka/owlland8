@@ -25,11 +25,11 @@ function doNoiseTone()
     nt.itd2 = snd.itd1;
     nt.ild2 = snd.ild1;
     nt.abi2 = snd.abi1;
-    nt.frequency = 1000;
-    nt.nperblock = 500;
-    nt.nblocks = 10;
+    nt.frequency = 4000;
+    nt.nperblock = 4;
+    nt.nblocks = 3;
     nt.isi = snd.isi;
-    nt.ibi = 15000; % ms
+    nt.ibi = 5000; % ms
     nt.rise = snd.rise;
     nt.amplitude = snd.amplitude;
     
@@ -436,6 +436,7 @@ function doNoiseTone()
     end
 
     function stopNoiseTone(src, event)
+        runningFlag = false;
         stopFlag = true;
         pauseFlag = false;
         updateButtons();
@@ -506,7 +507,7 @@ function doNoiseTone()
             Screen('Flip', w);
         
         end
-        
+                
         % now wait
         WaitSecs(ms/1000.0);
     end
@@ -518,9 +519,9 @@ function doNoiseTone()
         fprintf('Running Noise Tone, softtrig = %d\n', bSoftTrig);
     
         % update buttons
-        runningFlag = 1;
-        stopFlag = 0;
-        pauseFlag = 0;
+        runningFlag = true;
+        stopFlag = false;
+        pauseFlag = false;
         updateButtons();
         
         
@@ -537,6 +538,12 @@ function doNoiseTone()
         % corr_condition, abbreviated as 'corr' in the TDT tags. There are 
         % two conditions: 0 is correlated L/R, 1 is uncorrelated. 
 
+        
+        % test - get sound from buffers?
+        %sound(1:10)
+        %soundTest = RP_1.ReadTagV('Sound_corr', 0, 10)
+        
+        
 
         triggerFcn1 = [];
         triggerFcn2 = [];
@@ -566,19 +573,17 @@ function doNoiseTone()
 
                 if ~pauseFlag
 
-                    updateStatus({'Running', sprintf('Block %d/%d', iblock, nt.nblocks), sprintf('Rep %d/%d', ipair, nt.nperblock)});
+                    updateStatus({'Running', sprintf('Block %d/%d Rep %d/%d', iblock, nt.nblocks, ipair, nt.nperblock)});
                     %fprintf('Noise %d/%d\n', iblock, ipair);
 
                     % Noise
                     runTDTSound(nt.itd1, nt.ild1, nt.abi1, nt.duration1, nt.rise, nt.pre1, 0);
-
+                    
                     % Trigger and wait until sound complete
                     triggerFcn1();
 
                     % ISI                
                     WaitSecs(nt.isi/1000);
-
-                    %fprintf('Tone %d/%d\n', iblock, ipair);
 
                     % Tone
                     runTDTSound(nt.itd2, nt.ild2, nt.abi2, nt.duration2, nt.rise, nt.pre2, nNoise);
@@ -621,9 +626,9 @@ function doNoiseTone()
         fprintf('Running Noise Tone\n');
     
         % update buttons
-        runningFlag = 1;
-        stopFlag = 0;
-        pauseFlag = 0;
+        runningFlag = true;
+        stopFlag = false;
+        pauseFlag = false;
         updateButtons();
 
         count = 20;
@@ -639,7 +644,7 @@ function doNoiseTone()
             end
             drawnow;
         end
-        runningFlag = 0;
+        runningFlag = false;
         updateButtons();
         updateStatus('stopped', count);
 
