@@ -406,7 +406,8 @@ function doNoiseTone()
             'position', [xc3 50 220 60], ...
             'String', {'waiting....'}, ...
             'horizontalalignment', 'left', ...
-            'fontsize', 10, 'fontweight', 'bold');
+            'fontsize', 10);
+        %, 'fontweight', 'bold');
         updateButtons();
     
     end    
@@ -450,32 +451,39 @@ function doNoiseTone()
             
             s = {};
             if runningFlag
-                s{1} = 'NoiseTone Running...';
-            elseif pausedFlag
-                s{1} = 'NoiseTone Paused...';
-            else
-                s{1} = 'NoiseTone Waiting...';
+                s{1} = 'NoiseTone running...';
+            elseif pauseFlag
+                s{1} = 'NoiseTone paused...';
             end
             s{2} = sprintf('block %d/%d stim %d/%d', iblock, nt.nblocks, ipair, nt.nperblock);
             s{3} = sprintf('Time remaining: %d:%02d.%02d', hrs, min, sec);
 
             nt.uiStatusArea.String = s;
         elseif nargin == 0
-            nt.uiStatusArea.String = {'NoiseTone Waiting...'};
+            if stopFlag
+                nt.uiStatusArea.String = {'NoiseTone stopped.'};
+            elseif pauseFlag
+                nt.uiStatusArea.String = {'NoiseTone paused...'};
+            else
+                nt.uiStatusArea.String = {'NoiseTone waiting...'};
+            end
         end
-
+        drawnow;
     end
 
     function stopNoiseTone(src, event)
         runningFlag = false;
         stopFlag = true;
         pauseFlag = false;
+        updateStatus2();
         updateButtons();
     end
 
     function pauseNoiseTone(src, event)
         pauseFlag = ~pauseFlag;
         if pauseFlag; nt.uiPauseButton.String = 'Resume'; else; nt.uiPauseButton.String = 'Pause'; end;
+        updateStatus2();
+        drawnow;
     end
 
     function cbNoiseTone(src, event)
