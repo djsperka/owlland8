@@ -10,18 +10,16 @@ function doNoiseTone()
     c_red=[.7 .4 .4];
     NTTag = 'NoiseTone_win';
     
-    nt.pre1 = snd.pre;
-    nt.duration1 = snd.duration;
-    nt.post1 = snd.post;
+    nt.pre1 = 100;
+    nt.duration1 = 400;
     nt.itd1 = snd.itd1;
     nt.ild1 = snd.ild1;
     nt.abi1 = snd.abi1;
     nt.freqlo1 = snd.freqlo1;
     nt.freqhi1 = snd.freqhi1;
     
-    nt.pre2 = snd.pre;
-    nt.duration2 = snd.duration;
-    nt.post2 = snd.post;
+    nt.pre2 = 100;
+    nt.duration2 = 400;
     nt.itd2 = snd.itd1;
     nt.ild2 = snd.ild1;
     nt.abi2 = snd.abi1;
@@ -88,18 +86,18 @@ function doNoiseTone()
             'callback', @cbNoiseTone);
     
         %% set post
-        uicontrol('style','text',...
-            'position', [xc1 240 60 20],...
-            'backgroundcolor',c_yellow,...
-            'string','Post',...
-            'horizontalalignment','left');
-        nt.uiPost1 = uicontrol('style','edit',...
-            'position', [xc1+60 240 60 20],...
-            'backgroundcolor',c_yellow,...
-            'horizontalalignment','left',...
-            'string',nt.post1,...
-            'tag','post1',...
-            'callback', @cbNoiseTone);
+%         uicontrol('style','text',...
+%             'position', [xc1 240 60 20],...
+%             'backgroundcolor',c_yellow,...
+%             'string','Post',...
+%             'horizontalalignment','left');
+%         nt.uiPost1 = uicontrol('style','edit',...
+%             'position', [xc1+60 240 60 20],...
+%             'backgroundcolor',c_yellow,...
+%             'horizontalalignment','left',...
+%             'string',nt.post1,...
+%             'tag','post1',...
+%             'callback', @cbNoiseTone);
 
 
         %% set noiseband frequencies
@@ -216,18 +214,18 @@ function doNoiseTone()
             'callback', @cbNoiseTone);
     
         %% set post
-        uicontrol('style','text',...
-            'position', [xc1+150 240 60 20],...
-            'backgroundcolor',c_yellow,...
-            'string','Post',...
-            'horizontalalignment','left');
-        nt.uiPost2 = uicontrol('style','edit',...
-            'position', [xc1+150+60 240 60 20],...
-            'backgroundcolor',c_yellow,...
-            'horizontalalignment','left',...
-            'string',nt.post2,...
-            'tag','post2',...
-            'callback', @cbNoiseTone);
+%         uicontrol('style','text',...
+%             'position', [xc1+150 240 60 20],...
+%             'backgroundcolor',c_yellow,...
+%             'string','Post',...
+%             'horizontalalignment','left');
+%         nt.uiPost2 = uicontrol('style','edit',...
+%             'position', [xc1+150+60 240 60 20],...
+%             'backgroundcolor',c_yellow,...
+%             'horizontalalignment','left',...
+%             'string',nt.post2,...
+%             'tag','post2',...
+%             'callback', @cbNoiseTone);
     
     
         %% frequency for tone
@@ -435,6 +433,39 @@ function doNoiseTone()
         nt.uiStatusArea.String = st;
     end
 
+    function updateStatus2(varargin)
+        
+
+        if nargin == 2
+            
+            % iblock, ipair
+            iblock = varargin{1};
+            ipair = varargin{2};
+            remainingMS = 0;
+            totalMSPerBlock = nt.nperblock * (nt.pre1 + nt.duration1 + nt.isi + nt.pre2 + nt.duration2 + nt.isi);
+            remainingMS = ...
+                (nt.nblocks - iblock) * (totalMSPerBlock + nt.ibi) + ...
+                (nt.nperblock - ipair) * (nt.pre1 + nt.duration1 + nt.isi + nt.pre2 + nt.duration2 + nt.isi);
+            [hrs, min, sec] = hms(seconds(remainingMS/1000));
+            
+            s = {};
+            if runningFlag
+                s{1} = 'NoiseTone Running...';
+            elseif pausedFlag
+                s{1} = 'NoiseTone Paused...';
+            else
+                s{1} = 'NoiseTone Waiting...';
+            end
+            s{2} = sprintf('block %d/%d stim %d/%d', iblock, nt.nblocks, ipair, nt.nperblock);
+            s{3} = sprintf('Time remaining: %d:%02d.%02d', hrs, min, sec);
+
+            nt.uiStatusArea.String = s;
+        elseif nargin == 0
+            nt.uiStatusArea.String = {'NoiseTone Waiting...'};
+        end
+
+    end
+
     function stopNoiseTone(src, event)
         runningFlag = false;
         stopFlag = true;
@@ -452,14 +483,12 @@ function doNoiseTone()
         % update from gui elements
         nt.pre1 = str2num(get(nt.uiPre1,'string'));
         nt.duration1 = str2num(get(nt.uiDuration1,'string'));
-        nt.post1 = str2num(get(nt.uiPost1,'string'));
         nt.itd1 = str2num(get(nt.uiITD1,'string'));
         nt.ild1 = str2num(get(nt.uiILD1,'string'));
         nt.abi1 = str2num(get(nt.uiABI1,'string'));
 
         nt.pre2 = str2num(get(nt.uiPre2, 'string'));
         nt.duration2 = str2num(get(nt.uiDuration2, 'string'));
-        nt.post2 = str2num(get(nt.uiPost2, 'string'));
         nt.itd2 = str2num(get(nt.uiITD2, 'string'));
         nt.ild2 = str2num(get(nt.uiILD2, 'string'));
         nt.abi2 = str2num(get(nt.uiABI2, 'string'));
@@ -525,24 +554,25 @@ function doNoiseTone()
         updateButtons();
         
         
-        totalMSPerBlock = nt.nperblock * (nt.pre1 + nt.duration1 + nt.post1 + nt.isi + nt.pre2 + nt.duration2 + nt.post2 + nt.isi);
+        totalMSPerBlock = nt.nperblock * (nt.pre1 + nt.duration1 + nt.isi + nt.pre2 + nt.duration2 + nt.isi);
         totalMS = nt.nblocks * totalMSPerBlock + (nt.nblocks-1) * nt.ibi;
         fprintf('Expected running time %d sec per block, %d sec total\n', totalMSPerBlock/1000, totalMS/1000);
         
+        
+        % When stim are made, make them longer than what we need, to make
+        % sure we don't get extra samples at the end of a stim that really
+        % belong to the next stim. The 10% buffer should be more than
+        % enough.
+        sFactor = 1.1;
         fprintf('Creating sounds, loading on RP2...\n');
-        [nNoise, nTone, sound] = makeNoiseTone(snd.fs, snd.amplitude, nt.duration1, nt.freqlo1, nt.freqhi1, nt.duration2, nt.frequency);
+        [nNoise, nTone, sound] = makeNoiseTone(snd.fs, snd.amplitude, nt.duration1 * sFactor, nt.freqlo1, nt.freqhi1, nt.duration2 * sFactor, nt.frequency);
         RP_1.WriteTagV('sound_corr', 0, sound);
-        [nNoise_uncorr, nTone_uncorr, sound_uncorr] = makeNoiseTone(snd.fs, snd.amplitude, nt.duration1, nt.freqlo1, nt.freqhi1, nt.duration2, nt.frequency);
+        [nNoise_uncorr, nTone_uncorr, sound_uncorr] = makeNoiseTone(snd.fs, snd.amplitude, nt.duration1 * sFactor, nt.freqlo1, nt.freqhi1, nt.duration2 * sFactor, nt.frequency);
         RP_1.WriteTagV('sound_uncorr', 0, sound_uncorr);   
         % The use of one or both of these is controlled by the 
         % corr_condition, abbreviated as 'corr' in the TDT tags. There are 
         % two conditions: 0 is correlated L/R, 1 is uncorrelated. 
 
-        
-        % test - get sound from buffers?
-        %sound(1:10)
-        %soundTest = RP_1.ReadTagV('Sound_corr', 0, 10)
-        
         
 
         triggerFcn1 = [];
@@ -573,7 +603,8 @@ function doNoiseTone()
 
                 if ~pauseFlag
 
-                    updateStatus({'Running', sprintf('Block %d/%d Rep %d/%d', iblock, nt.nblocks, ipair, nt.nperblock)});
+                    %updateStatus({'Running', sprintf('Block %d/%d Rep %d/%d', iblock, nt.nblocks, ipair, nt.nperblock)});
+                    updateStatus2(iblock, ipair);
                     %fprintf('Noise %d/%d\n', iblock, ipair);
 
                     % Noise
@@ -595,7 +626,8 @@ function doNoiseTone()
                     WaitSecs(nt.isi/1000);
                     
                 else
-                    updateStatus({'Paused', sprintf('Block %d/%d', iblock, nt.nblocks), sprintf('Rep %d/%d', ipair, nt.nperblock)});                    
+                    updateStatus2(iblock, ipair);
+                    %updateStatus({'Paused', sprintf('Block %d/%d', iblock, nt.nblocks), sprintf('Rep %d/%d', ipair, nt.nperblock)});                    
                     while pauseFlag && ~stopFlag
                         WaitSecs(0.5);
                         drawnow;
@@ -606,6 +638,12 @@ function doNoiseTone()
             end
             if stopFlag; break; end;
         end
+        
+        if runningFlag
+            runningFlag = false;
+            updateStatus2();
+        end
+        
         
         if ~bSoftTrig
 
