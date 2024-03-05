@@ -17,6 +17,7 @@ function doNoiseTone()
     nt.abi1 = snd.abi1;
     nt.freqlo1 = snd.freqlo1;
     nt.freqhi1 = snd.freqhi1;
+    nt.amplitude1 = 2.5;
     
     nt.pre2 = 100;
     nt.duration2 = 400;
@@ -28,8 +29,8 @@ function doNoiseTone()
     nt.nblocks = 3;
     nt.isi = snd.isi;
     nt.ibi = 5000; % ms
-    nt.rise = snd.rise;
-    nt.amplitude = snd.amplitude;
+    nt.rise = 5;
+    nt.amplitude2 = 2.5;
     
     nt.softtrig = true;
 
@@ -113,8 +114,6 @@ function doNoiseTone()
             'string',nt.freqlo1,...
             'tag','freqlo1',...
             'callback', @cbNoiseTone);
-    
-        % ild1
         uicontrol('style','text',...
             'position', [xc1 180 60 20],...
             'backgroundcolor',c_yellow,...
@@ -128,6 +127,20 @@ function doNoiseTone()
             'tag','freqhi1',...
             'callback', @cbNoiseTone);
 
+        %% amplitudes
+        uicontrol('style','text',...
+            'position', [xc1 150 60 20],...
+            'backgroundcolor',c_yellow,...
+            'string','Amplitude',...
+            'horizontalalignment','left');
+        nt.uiAmplitude1 = uicontrol('style','edit',...
+            'position', [xc1+60 150 60 20],...
+            'backgroundcolor',c_yellow,...
+            'horizontalalignment','left',...
+            'string',nt.amplitude1,...
+            'tag','amplitude1',...
+            'callback', @cbNoiseTone);
+        
 
 
         %% set itd1
@@ -242,7 +255,22 @@ function doNoiseTone()
             'tag','frequency',...
             'callback', @cbNoiseTone);
     
-    
+
+        %% amplitudes
+        uicontrol('style','text',...
+            'position', [xc1+150 150 60 20],...
+            'backgroundcolor',c_yellow,...
+            'string','Amplitude',...
+            'horizontalalignment','left');
+        nt.uiAmplitude2 = uicontrol('style','edit',...
+            'position', [xc1+150+60 150 60 20],...
+            'backgroundcolor',c_yellow,...
+            'horizontalalignment','left',...
+            'string',nt.amplitude2,...
+            'tag','amplitude2',...
+            'callback', @cbNoiseTone);
+
+        
         %% set itd2
         uicontrol('style','text',...
             'position', [xc1+150 120 60 20],...
@@ -494,12 +522,13 @@ function doNoiseTone()
         nt.itd1 = str2num(get(nt.uiITD1,'string'));
         nt.ild1 = str2num(get(nt.uiILD1,'string'));
         nt.abi1 = str2num(get(nt.uiABI1,'string'));
-
+        nt.amplitude1 = str2num(get(nt.uiAmplitude1,'string'));
         nt.pre2 = str2num(get(nt.uiPre2, 'string'));
         nt.duration2 = str2num(get(nt.uiDuration2, 'string'));
         nt.itd2 = str2num(get(nt.uiITD2, 'string'));
         nt.ild2 = str2num(get(nt.uiILD2, 'string'));
         nt.abi2 = str2num(get(nt.uiABI2, 'string'));
+        nt.amplitude2 = str2num(get(nt.uiAmplitude2,'string'));
         nt.frequency = str2num(get(nt.uiFrequency, 'string'));
         nt.nperblock = str2num(get(nt.uiNPerBlock, 'string'));
         nt.nblocks = str2num(get(nt.uiNBlocks, 'string'));
@@ -573,9 +602,9 @@ function doNoiseTone()
         % enough.
         sFactor = 1.1;
         fprintf('Creating sounds, loading on RP2...\n');
-        [nNoise, nTone, sound] = makeNoiseTone(snd.fs, snd.amplitude, nt.duration1 * sFactor, nt.freqlo1, nt.freqhi1, nt.duration2 * sFactor, nt.frequency);
+        [nNoise, nTone, sound] = makeNoiseTone(snd.fs, nt.amplitude1, nt.duration1 * sFactor, nt.freqlo1, nt.freqhi1, nt.amplitude2, nt.duration2 * sFactor, nt.frequency);
         RP_1.WriteTagV('sound_corr', 0, sound);
-        [nNoise_uncorr, nTone_uncorr, sound_uncorr] = makeNoiseTone(snd.fs, snd.amplitude, nt.duration1 * sFactor, nt.freqlo1, nt.freqhi1, nt.duration2 * sFactor, nt.frequency);
+        [nNoise_uncorr, nTone_uncorr, sound_uncorr] = makeNoiseTone(snd.fs, nt.amplitude1, nt.duration1 * sFactor, nt.freqlo1, nt.freqhi1, nt.amplitude2, nt.duration2 * sFactor, nt.frequency);
         RP_1.WriteTagV('sound_uncorr', 0, sound_uncorr);   
         % The use of one or both of these is controlled by the 
         % corr_condition, abbreviated as 'corr' in the TDT tags. There are 
@@ -645,6 +674,11 @@ function doNoiseTone()
                 if stopFlag; break; end;
             end
             if stopFlag; break; end;
+            
+            % Inter block interval here (but not on last block, duh)
+            if iblock < nt.nblocks
+                WaitSecs(nt.ibi/1000);
+            end
         end
         
         if runningFlag
