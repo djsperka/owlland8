@@ -1,4 +1,4 @@
-function [nSampleNoise, nSampleTone, sound] = makeNoiseTone(fs, amplitude, dur1, freqlo1, freqhi1, dur2, freq2)
+function [nSampleNoise, nSampleTone, sound] = makeNoiseTone(fs, amplitude1, dur1, freqlo1, freqhi1, amplitude2, dur2, freq2)
 %makeNoiseTone Creates a single buffer containing two sound stimuli - noise
 %and a tone. Returns a single row vector.
 %   The first stim is band filtered noise, the second is a pure tone. There
@@ -18,7 +18,7 @@ function [nSampleNoise, nSampleTone, sound] = makeNoiseTone(fs, amplitude, dur1,
     sound = zeros(1, nSampleNoise + nSampleTone);
  
     %% Noise
-    y=amplitude*randn(nSampleNoise + 10000, 1);
+    y=amplitude1*randn(nSampleNoise + 10000, 1);
     [b,a] = ellip(7,5,35,[freqlo1/(fs/2) freqhi1/(fs/2)]);
     filtered=filter(b,a,y);
     N=length(filtered);
@@ -26,7 +26,7 @@ function [nSampleNoise, nSampleTone, sound] = makeNoiseTone(fs, amplitude, dur1,
     sound(1:nSampleNoise) = filtered_lo;   %% 
 
     %% Tone
-    sound(nSampleNoise+1 : nSampleNoise+nSampleTone) = sin(2 * pi * freq2 * t);
+    sound(nSampleNoise+1 : nSampleNoise+nSampleTone) = amplitude2 * sin(2 * pi * freq2 * t);
 
 end
 
